@@ -4,7 +4,7 @@
 
 **This Bot was made for the server [Doggo Dankers](https://discord.gg/NpBV66FjGb)**
 
-It helps facilitate the server. It has an economy system, in brief:
+It helps facilitate the server. It has an economy, giveaways and donation system, in brief:
 
 ## Doggocoins can be earned by:
 	Voting for server on top.gg
@@ -19,7 +19,17 @@ It helps facilitate the server. It has an economy system, in brief:
 	Creating a custom role for yourself
 	Getting extra entries in giveaways
 	and more perks.
-
+## Giveaways syntax:
+	gstart <time> <role id or None> <prize>
+	gcreate
+	greroll <channel id> <message id>
+	ghelp/gcommands
+	license
+	gend <channel id> <message id>
+## Donations syntax:
+	donations <user or None>
+	dadd <user> <amount>
+	drm <user> <amount>
 # Features
 	- Highly Configurable
 	- Easy to Configure
@@ -34,7 +44,8 @@ Then do `python -m poetry` to install all required packages.
 Replace "TOKEN" with your token, voila!
 
 For configuration to your server, you need basic Python, Discord Server handling & Discord.py knowledge.
-
+# Writeup:
+A complicated document on how this was created for developers [Click Me](https://github.com/Project-cerebrus/Akaza/blob/master/writeup.md)
 # Help or Report
 Please report errors or issues to Ace'#7777 or Eris#9876 or **Raise an ISSUE**
 
