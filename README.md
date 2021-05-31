@@ -26,7 +26,7 @@ It helps facilitate the server. It has an economy system, in brief:
 	- Feature Packed
 
 ### Configuration Instructions
-Please head over to [constants.py](https://github.com/Ace-9999/Akaza/blob/master/library/constants.py) and replace all role id's with your role id's, prefix with your desired prefix(es)
+Please head over to [constants.py](https://github.com/Project-cerebrus/Akaza/blob/master/library/constants.py) and replace all role id's with your role id's, prefix with your desired prefix(es)
 etc.
 
 Then do `python -m poetry` to install all required packages.
@@ -37,5 +37,8 @@ For configuration to your server, you need basic Python, Discord Server handling
 
 # Help or Report
 Please report errors or issues to Ace'#7777 or Eris#9876 or **Raise an ISSUE**
+
+### Disclaimer:
+This is not part of cerebrus the bot but rather made by the same developers
 
 [![forthebadge made-with-python](http://ForTheBadge.com/images/badges/made-with-python.svg)](https://www.python.org/)
