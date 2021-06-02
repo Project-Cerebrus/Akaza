@@ -362,6 +362,23 @@ class giveaways(commands.Cog, name='giveaways'):
 			await ctx.send("missing permissions, required premissons are manage_channels or administrator")
 	@commands.command()
 	async def ginfo(self,ctx,gawid):
+			with open("data/gawid.json","r") as z:
+				gawidz = json.load(z)
+			for item in gawidz:
+				if gawid == gawidz[item]["gawid"]:
+					guildid = gawidz[item]["guild"]
+					authorid = gawidz[item]["author"]
+					guild = self.bot.get_guild(guildid)
+					reqid = gawidz[item]["req"]
+					prize = gawidz[item]["prize"]
+					channelid = gawidz[item]["channel"]
+					channel = guild.get_channel(int(channelid))
+					gawid = gawidz[item]["gawid"]
+					msgid = gawidz[item]["msgid"]
+					if ctx.guild.id != guildid:
+						return await ctx.send("This is from a different guild please use it in that guild")
+			embed = discord.Embed(title="Giveaway information",description=f"id: {gawid}\nauthor: {authorid}\nprize: {prize}\nchannel: <#{channelid}>",color=ctx.author.color)
+			await ctx.send(embed=embed)
 	"""
 	@commands.command(name="giftrrl", aliases=["gifreroll", "greroll", "grr","gend"])
 	async def gawend(self, ctx, channel : discord.TextChannel, id_: int):
