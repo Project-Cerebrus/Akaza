@@ -4,8 +4,11 @@ class Config:
 	PREFIX = ["dd?", "doggo ", ",","="]
 	BOT_TOKEN = os.environ["TOKEN"]
 	CURRENCY_NAME = "DoggoCoins"
-	CURRENCY_ICON = "<a:Percy_Coin:846066452703870976>"
+	CURRENCY_ICON = "Ⓓ"
 	COLOR_THEME = discord.Color.dark_red()
+class Emotes:
+	w_arrow = 849131436865749032
+	p_arrow = 849135000406589500
 
 class Roles:
 	ADMIN = [824784517541134386, 824626266094305331, 824626336558743603, 824628347715321866]

@@ -7,6 +7,7 @@ def load_donation():
 async def open_donation(user):
 	users = load_donation()
 	if str(user.id) not in users:
+		users[str(user.id)] = {}
 		users[str(user.id)]["donations"] = 0
 		with open("data/donations.json","w") as z:
 			json.dump(users,z)

