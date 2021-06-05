@@ -15,6 +15,7 @@ flask = "^2.0.1"
 urbandict = "^0.6.1"
 ping3 = "^2.7.0"
 discord-buttons-plugin = "^0.1.2"
+dhooks = "^1.1.4"
 
 [tool.poetry.dev-dependencies]
 

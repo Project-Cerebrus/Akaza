@@ -1,5 +1,6 @@
 from discord.ext import commands
 import io, textwrap, traceback
+from library import constants
 from contextlib import redirect_stdout
 
 def cleanup_code(content):
@@ -19,6 +20,8 @@ class eval(commands.Cog, name='evaluation'):
 	
 	@commands.command(pass_context=True, hidden=True, name='eval')
 	async def _eval(self, ctx, *, body: str):
+		if ctx.author.id not in constants.DEVS:
+			return
 		"""Evaluates a code"""
 
 		env = {

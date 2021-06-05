@@ -187,6 +187,11 @@ class giveaways(commands.Cog, name='giveaways'):
 						await latestmsg.edit(embed=embed)
 						winbed = discord.Embed(title="You Won",description=f"You won {prize} in {guild.name}\nDM {author.name} for your prize if not already paid",color=author.color)
 						await winner.send(embed=winbed)
+					with open("data/gawid.json","r") as idz:
+						addwinner = json.load(idz)
+					addwinner[str(my_msg.id)]["winner"] = winner.id
+					with open("data/gawid.json","w") as gauze:
+						json.dump(addwinner,gauze)
 					del gaw[item]
 					with open("data/gaw.json","w") as gawz:
 						json.dump(gaw,gawz)
@@ -354,7 +359,14 @@ class giveaways(commands.Cog, name='giveaways'):
 			await checkreq(users,reqrole,new_msg,prize,author,ctx)
 
 			winner = random.choice(users)
-
+			embed = discord.Embed(title = "Giveaway!", description = f"{prize}", color = author.color)
+			embed.add_field(name = f"Winner:", value = f"{winner.mention}")
+			embed.add_field(name = "Requirement:", value = f"{reqid}")
+			embed.add_field(name = "By:", value = f"{author.mention}",inline=False)
+			embed.add_field(name = "Id:", value = f"{gawid}",inline=True)
+			embed.set_footer(text = f"Ended")
+			embed.set_thumbnail(url="https://i.pinimg.com/originals/eb/2a/8f/eb2a8f4ddfb50c23712a3cd0d5cc2a3a.gif")
+			await new_msg.edit(embed=embed)
 			await new_msg.reply(f"Congratulations! The new winner is {winner.mention}.!") 
 			winbed = discord.Embed(title="You Won",description=f"You won {prize} in {guild.name}\nDM {author.name} for your prize if not already paid",color=author.color)
 			await winner.send(embed=winbed)
@@ -375,9 +387,14 @@ class giveaways(commands.Cog, name='giveaways'):
 					channel = guild.get_channel(int(channelid))
 					gawid = gawidz[item]["gawid"]
 					msgid = gawidz[item]["msgid"]
+					try:
+						winner = gawidz[item]["winner"]
+						winner = f"<@{winner}>"
+					except KeyError:
+						winner = "undertermined"
 					if ctx.guild.id != guildid:
 						return await ctx.send("This is from a different guild please use it in that guild")
-			embed = discord.Embed(title="Giveaway information",description=f"id: {gawid}\nauthor: {authorid}\nprize: {prize}\nchannel: <#{channelid}>",color=ctx.author.color)
+			embed = discord.Embed(title="Giveaway information",description=f"id: {gawid}\nauthor: {authorid}\nprize: {prize}\nchannel: <#{channelid}>\nWinner: {winner}",color=ctx.author.color)
 			await ctx.send(embed=embed)
 	"""
 	@commands.command(name="giftrrl", aliases=["gifreroll", "greroll", "grr","gend"])

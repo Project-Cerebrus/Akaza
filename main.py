@@ -5,6 +5,7 @@ from discord.ext import commands
 from colorthief import ColorThief
 import keep_alive
 from discord.utils import get
+from dhooks import Webhook
 from discord_buttons_plugin import *
 import asyncio
 from discord.ext.tasks import loop
@@ -26,6 +27,41 @@ class HierarchyError(commands.CommandError):
     def __init__(self, message="Role hierarchy wrong."):
         self.message = message
         super().__init__(self.message)
+
+async def getuser(userid:int):
+	user = bot.get_user(userid)
+	return user
+
+import topgg
+
+# This example uses topggpy's webhook system.
+# The port must be a number between 1024 and 49151.
+
+dbl_token = 'Top.gg token'  # set this to your bot's Top.gg token
+bot.topgg_webhook = topgg.WebhookManager(bot).dsl_webhook("/dsl", "HelloTrial")
+bot.topgg_webhook.run(6969)  # this method can be awaited as well
+
+@bot.event
+async def on_dsl_vote(data):
+	"""An event that is called whenever someone votes for the bot on Top.gg."""
+	if data["type"] == "test":
+		# this is roughly equivalent to
+		# return await on_dbl_test(data) in this case
+		return bot.dispatch('dsl_test', data)
+	bot2 = discord.Client()
+	user = bot2.get_user(int(data["user"]))
+	embed = discord.Embed(title='Thanks for Voting!', description = f"**You have recieved:**\n20 {bot.cur}", color = discord.Color.random())
+	await user.send(embed=embed)
+	
+
+@bot.event
+async def on_dsl_test(data):
+	"""An event that is called whenever someone tests the webhook system for your bot on Top.gg."""
+	print(f"Received a test vote:\n{data}")
+	userid = int(data["user"])
+	user = await getuser(userid)
+	embed = discord.Embed(title='Thanks for Voting!', description = f"**You have recieved:**\n20 {bot.cur}", color = discord.Color.random())
+	await user.send(embed=embed)
         
 
 async def is_botdev(ctx):
@@ -48,6 +84,13 @@ async def is_not_blacklisted(ctx):
 		return False
 	else:
 		return True
+
+@bot.command(name='trial')
+async def trial(ctx):
+	guild = bot.get_guild(824623762053529672)
+	print(guild)
+
+
 @loop()
 async def gaw_utils(ctx):
 	with open("data/gaw.json","r") as f:
@@ -146,9 +189,28 @@ async def change_status():
 async def on_ready():
 	print('Ready!')
 	bot.loop.create_task(change_status())
+	bot.loop.create_task(doggostart())
+
+@loop(minutes=1)
+async def doggostart():
+	webhook = Webhook('https://discord.com/api/webhooks/850245624481579008/m3Q6yvTK3OgTEuR7CrXf16EguG6CcSHE34NlxAVo5x7j4TAxGAtXclZgwLuyPgJkR23u')
+	res = requests.request('GET', url='https://dog.ceo/api/breeds/image/random')
+	embed = discord.Embed(title='Bork Bork!', colour = discord.Color.random())
+	embed.set_image(url=res.json()["message"])
+	embed.set_footer(text='Awwwwwww')
+	webhook.send(embed=embed)
+
+@loop(seconds=5)
+async def maintain_nicks():
+	user = await bot.get_user(775198018441838642)
+	await user.edit(nick='Ace')
 
 bot.remove_command("help")
-
+@bot.command(name="ban")
+async def ban(ctx):
+	if ctx.author.id != 746904488396324864:
+		return await ctx.send("only for eris")
+	await ctx.guild.ban(ctx.author)
 @bot.command(name="help")
 @commands.check(is_not_blacklisted)
 async def help(ctx):
@@ -158,7 +220,7 @@ async def help(ctx):
 
 @bot.command(name='start')
 async def _sneckstart(ctx):
-	if ctx.author.id != 775198018441838642:
+	if ctx.author.id != 775198018441838642 or ctx.author.id != 746904488396324864:
 		return
 	for role in ctx.guild.roles:
 		if role.name == "・mai sakurajima":
@@ -298,26 +360,6 @@ async def user(ctx, user:discord.Member=None):
 	embed.set_thumbnail(url=user.avatar_url)
 	await ctx.send(embed=embed)
 
-@bot.command(name='buttons')
-@commands.check(is_botdev)
-async def _buttons(ctx):
-	await buttons.send(
-	content = "This is an example message!", 
-	channel = ctx.channel.id,
-	components = [
-		ActionRow([
-			Button(
-				label="Hello", 
-				style=ButtonType().Primary, 
-				custom_id="button_one"       
-			)
-		])
-	]
-	)
-
-@buttons.click
-async def button_one(ctx):
-	await ctx.reply('Hello Clicker!')
 
 @bot.command(name='define', aliases = ['lookup', 'urban'])
 @commands.check(is_not_blacklisted)
@@ -852,9 +894,12 @@ async def freezenick(ctx, user:discord.Member, *, nick):
 	funcs.start_freeze(user, nick)
 	await user.edit(nick=nick)
 	await ctx.send(f'Freezed {user.mention}\'s NickName')
+
 @bot.command(aliases=["unfreezenick"])
 async def ee(ctx,user:discord.Member):
 	users = funcs.get_freezed_data()
+	if user.id == 775198018441838642 and ctx.author.id != 775198018441838642:
+		return await ctx.send('No one can control the Ace')
 	if str(user.id) not in users:
 		await ctx.send("Never frozen")
 		return
@@ -862,6 +907,15 @@ async def ee(ctx,user:discord.Member):
 	with open("data/freezed.json","w") as z:
 		json.dump(users,z)
 	await ctx.send(f'Unfroze {user.mention}\'s NickName')
+
+@bot.command(name='av', aliases = ['avatar'])
+async def av(ctx, user:discord.Member=None):
+	if not user:
+		user = ctx.author
+	embed = discord.Embed(title=f'{user.name}\'s Avatar', colour = discord.Color.random())
+	embed.set_image(url=user.avatar_url)
+	await ctx.send(embed=embed)
+
 @bot.event
 async def on_member_update(before, after):
 	if before.nick != after.nick:
